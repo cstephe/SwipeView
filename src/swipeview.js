@@ -315,7 +315,10 @@ var SwipeView = (function (window, document) {
 				deltaX = point.pageX - this.pointX,
 				deltaY = point.pageY - this.pointY,
 				newX = this.x + deltaX,
-				dist = Math.abs(point.pageX - this.startX);
+				dist = Math.abs(point.pageX - this.startX),
+				wrapperBound = this.wrapper.getBoundingClientRect(),
+				absoluteWrapperLeft = wrapperBound.left + window.pageXOffset,
+				absoluteWrapperRight = absoluteWrapperLeft + wrapperBound.width;
 
 			this.moved = true;
 			this.pointX = point.pageX;
@@ -334,6 +337,14 @@ var SwipeView = (function (window, document) {
 			if (!this.directionLocked && this.stepsY > this.stepsX) {
 				this.initiated = false;
 				return;
+			}
+
+			// If using touch we need to determine if the user swiped outside of the bounds of the
+			// container.  This is not an issue for non touch which would never get in here.
+			if(hasTouch){
+				if (point.pageX < absoluteWrapperLeft || point.pageX > absoluteWrapperRight){
+				    return;
+				}
 			}
 
 			e.preventDefault();
